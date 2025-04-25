@@ -88,7 +88,7 @@ const MainContent: React.FC = () => {
           <div className="bg-gothicGray dark:bg-gothicDark rounded-b-lg shadow-xl p-6 transition-all duration-300">
             {/* Flowchart Tab */}
             {activeTab === "flow" && (
-              <FlowChart nodes={fileTree} />
+              <FlowChart nodes={fileTree} repoUrl={repoUrl} />
             )}
 
             {/* Chat Tab */}
