@@ -1,6 +1,6 @@
-// src/components/FlowChart.tsx
 import React, { useEffect, useState, useRef } from "react";
 import mermaid from "mermaid";
+import { saveAs } from "file-saver";
 import { FileNode } from "../services/github";
 
 export interface FlowChartProps {
@@ -29,16 +29,20 @@ const FlowChart: React.FC<FlowChartProps> = ({ nodes }) => {
     }
 
     // In your FlowChart.tsx, update the init block in the first useEffect:
-const init = `%%{init:{
-  "theme": "dark",
-  "flowchart": {"nodeSpacing":30,"rankSpacing":60,"useMaxWidth":false},
-  "themeVariables": {
-    "fontSize":"14px",
-    "primaryTextColor":"#EEE",
-    "lineColor":"#888",
-    "strokeWidth":"1px"
-  }
-}}%%`;
+    const init = `%%{init:{
+      "theme": "dark",
+      "flowchart": {
+        "nodeSpacing": 30,
+        "rankSpacing": 60,
+        "useMaxWidth": false
+      },
+      "themeVariables": {
+        "background": "#000000",
+        "primaryTextColor": "#EEE",
+        "lineColor": "#888",
+        "strokeWidth": "1px"
+      }
+    }}%%`;
 
     // Left→Right layout
     
@@ -61,17 +65,37 @@ const init = `%%{init:{
   }, []);
 
   // 3) Render the diagram whenever the DSL changes
+// 3) Render the diagram whenever the DSL changes
   useEffect(() => {
     const el = chartRef.current;
     if (!el) return;
 
-    if (!diagram) {
-      el.innerHTML = `<p class="text-gray-500">No diagram to display yet.</p>`;
-      return;
-    }
+    const renderDiagram = async () => {
+      if (!diagram) {
+        el.innerHTML = `<p class="text-gray-500">No diagram to display yet.</p>`;
+        return;
+      }
 
-    el.innerHTML = diagram;
-    mermaid.init(undefined, el);
+      try {
+        // Clear previous content
+        el.innerHTML = diagram;
+        
+        // Wait for Mermaid rendering to complete
+        await mermaid.init(undefined, el);
+        
+        // Add critical SVG attributes for exports
+        const svg = el.querySelector('svg');
+        if (svg) {
+          svg.setAttribute('width', `${svg.scrollWidth}`);
+          svg.setAttribute('height', `${svg.scrollHeight}`);
+          svg.style.backgroundColor = '#1a1a1a'; // Match dark theme
+        }
+      } catch (error) {
+        console.error('Mermaid rendering error:', error);
+      }
+    };
+
+    renderDiagram();
   }, [diagram]);
 
   // Mouse handlers for click-and-drag panning
@@ -96,8 +120,57 @@ const init = `%%{init:{
     if (scrollRef.current) scrollRef.current.style.cursor = "grab";
   };
 
+  // → Export handlers
+  const handleOpenNewTab = () => {
+    const svg = chartRef.current?.querySelector("svg");
+    if (!svg) return;
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Flowchart</title></head>
+<body style="margin:0;background:#000">
+  ${svg.outerHTML}
+</body></html>`;
+    const blob = new Blob([html], { type: "text/html" });
+    const url  = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+  };
+  
+  // Update SVG export handler
+  const handleDownloadSVG = () => {
+    const svgEl = chartRef.current?.querySelector("svg");
+    if (!svgEl) return;
+  
+    // Create a clean copy of the SVG
+    const clone = svgEl.cloneNode(true) as SVGElement;
+    clone.style.transform = 'none';
+    
+    // Set explicit dimensions
+    clone.setAttribute('width', `${svgEl.scrollWidth}`);
+    clone.setAttribute('height', `${svgEl.scrollHeight}`);
+    clone.setAttribute('viewBox', `0 0 ${svgEl.scrollWidth} ${svgEl.scrollHeight}`);
+  
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(clone);
+    
+    // Add XML header
+    const fullSVG = `<?xml version="1.0" encoding="UTF-8"?>\n${svgString}`;
+    
+    const blob = new Blob([fullSVG], { type: "image/svg+xml;charset=utf-8" });
+    saveAs(blob, "flowchart.svg");
+  };
+
   return (
     <div className="relative">
+      {/* Toolbar */}
+      <div className="flex flex-wrap gap-2 mb-2">
+        <button onClick={handleOpenNewTab}
+                className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+          Open in New Tab
+        </button>
+        <button onClick={handleDownloadSVG}
+                className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+          Download SVG
+        </button>
+      </div>
       {/* Zoom Slider */}
       <div className="mb-2">
         <input
