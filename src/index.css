@@ -88,3 +88,10 @@
 .dark .glass-effect {
   background: rgba(17, 24, 39, 0.7);
 }
+
+/* ensure all SVG text is legible */
+.mermaid svg text {
+  font-size: 18px !important;
+  fill: #EEE !important;
+  font-weight: 500;
+}

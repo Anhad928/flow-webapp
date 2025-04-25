@@ -6,9 +6,7 @@ export interface FileNode {
   type: "blob" | "tree";
 }
 
-const octokit = new Octokit({
-  baseUrl: import.meta.env.VITE_GITHUB_API_BASE
-});
+const octokit = new Octokit();    // ← no baseUrl override
 
 export async function fetchRepoTree(repoUrl: string): Promise<FileNode[]> {
   const { pathname } = new URL(repoUrl);
@@ -21,7 +19,7 @@ export async function fetchRepoTree(repoUrl: string): Promise<FileNode[]> {
   const { data: repoData } = await octokit.repos.get({ owner, repo });
   const branch = repoData.default_branch;
 
-  // 2) Fetch recursive tree
+  // 2) Fetch the full tree
   const { data: treeData } = await octokit.git.getTree({
     owner,
     repo,
@@ -30,11 +28,11 @@ export async function fetchRepoTree(repoUrl: string): Promise<FileNode[]> {
   });
 
   if (!treeData.tree) {
-    throw new Error("No tree data returned from GitHub");
+    throw new Error("GitHub returned no tree data");
   }
 
-  // 3) Filter & map to FileNode
-  const nodes: FileNode[] = treeData.tree
+  // 3) Filter & map
+  return treeData.tree
     .filter(
       (item): item is { path: string; type: "blob" | "tree" } =>
         (item.type === "blob" || item.type === "tree") &&
@@ -44,6 +42,4 @@ export async function fetchRepoTree(repoUrl: string): Promise<FileNode[]> {
       path: item.path,
       type: item.type,
     }));
-
-  return nodes;
 }
