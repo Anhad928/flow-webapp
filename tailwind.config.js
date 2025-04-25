@@ -5,6 +5,7 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Your existing palettes...
         primary: {
           50: '#f5f3ff',
           100: '#ede9fe',
@@ -41,11 +42,18 @@ export default {
           800: '#92400e',
           900: '#78350f',
         },
+
+        // Gothic palette
+        gothicRed: '#e00',    // bright blood-red
+        gothicGray: '#222',  // near-black panels
+        gothicDark: '#000',  // pure black background
       },
-      animation: {
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+
+      // <-- NEW: black→red gradient utility -->
+      backgroundImage: {
+        'black-red': 'linear-gradient(90deg, #000 0%, #e00 100%)',
       },
     },
   },
   plugins: [],
-};
+}
