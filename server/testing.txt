@@ -1,0 +1,573 @@
+curl -N http://localhost:4000/api/analyze \
+     -H "Content-Type: application/json"   \
+     -d '{"repo":"https://github.com/vercel/next.js","tree":[{"path":"README.md","type":"blob"}]}
+
+# Run the above command to check if the server is running and responding correctly.
+
+
+Expected output:-
+
+data: 
+
+data: #
+
+data:  Next
+
+data: .js
+
+data:  Overview
+
+data: 
+
+
+
+data: Next
+
+data: .js
+
+data:  is
+
+data:  a
+
+data:  powerful
+
+data:  React
+
+data:  framework
+
+data:  for
+
+data:  building
+
+data:  server
+
+data: -side
+
+data:  rendered
+
+data:  and
+
+data:  static
+
+data:  web
+
+data:  applications
+
+data: .
+
+data:  It
+
+data:  offers
+
+data:  a
+
+data:  hybrid
+
+data:  approach
+
+data:  to
+
+data:  rendering
+
+data: ,
+
+data:  allowing
+
+data:  developers
+
+data:  to
+
+data:  choose
+
+data:  between
+
+data:  static
+
+data:  generation
+
+data:  and
+
+data:  server
+
+data: -side
+
+data:  rendering
+
+data:  on
+
+data:  a
+
+data:  per
+
+data: -page
+
+data:  basis
+
+data: .
+
+
+
+data: ##
+
+data:  Key
+
+data:  Features
+
+data: 
+
+
+
+data: -
+
+data:  **
+
+data: Hybrid
+
+data:  Rendering
+
+data: **
+
+data: :
+
+data:  Combine
+
+data:  static
+
+data:  generation
+
+data:  and
+
+data:  server
+
+data: -side
+
+data:  rendering
+
+data:  for
+
+data:  optimal
+
+data:  performance
+
+data: .
+
+
+data: -
+
+data:  **
+
+data: File
+
+data: -based
+
+data:  Routing
+
+data: **
+
+data: :
+
+data:  Automatically
+
+data:  creates
+
+data:  routes
+
+data:  based
+
+data:  on
+
+data:  the
+
+data:  file
+
+data:  structure
+
+data:  of
+
+data:  the
+
+data:  `
+
+data: pages
+
+data: `
+
+data:  directory
+
+data: .
+
+
+data: -
+
+data:  **
+
+data: API
+
+data:  Routes
+
+data: **
+
+data: :
+
+data:  Build
+
+data:  backend
+
+data:  functionality
+
+data:  directly
+
+data:  within
+
+data:  the
+
+data:  Next
+
+data: .js
+
+data:  application
+
+data: .
+
+
+data: -
+
+data:  **
+
+data: Automatic
+
+data:  Code
+
+data:  Spl
+
+data: itting
+
+data: **
+
+data: :
+
+data:  Loads
+
+data:  only
+
+data:  the
+
+data:  necessary
+
+data:  Java
+
+data: Script
+
+data:  for
+
+data:  the
+
+data:  current
+
+data:  page
+
+data: .
+
+
+data: -
+
+data:  **
+
+data: Fast
+
+data:  Refresh
+
+data: **
+
+data: :
+
+data:  Enables
+
+data:  rapid
+
+data:  development
+
+data:  with
+
+data:  a
+
+data:  live
+
+data: -edit
+
+data: ing
+
+data:  experience
+
+data: .
+
+
+
+data: ##
+
+data:  Getting
+
+data:  Started
+
+data: 
+
+
+
+data: To
+
+data:  create
+
+data:  a
+
+data:  new
+
+data:  Next
+
+data: .js
+
+data:  application
+
+data: ,
+
+data:  you
+
+data:  can
+
+data:  use
+
+data:  the
+
+data:  following
+
+data:  command
+
+data: :
+
+
+
+data: ```
+
+data: bash
+
+data: 
+
+
+data: n
+
+data: px
+
+data:  create
+
+data: -next
+
+data: -app
+
+data: @
+
+data: latest
+
+data: 
+
+
+data: ``
+
+data: `
+
+
+
+data: ##
+
+data:  Documentation
+
+data: 
+
+
+
+data: Com
+
+data: prehensive
+
+data:  documentation
+
+data:  is
+
+data:  available
+
+data:  at
+
+data:  [
+
+data: Next
+
+data: .js
+
+data:  Documentation
+
+data: ](
+
+data: https
+
+data: ://
+
+data: next
+
+data: js
+
+data: .org
+
+data: /docs
+
+data: ),
+
+data:  covering
+
+data:  installation
+
+data: ,
+
+data:  routing
+
+data: ,
+
+data:  data
+
+data:  fetching
+
+data: ,
+
+data:  and
+
+data:  advanced
+
+data:  features
+
+data: .
+
+
+
+data: ##
+
+data:  Community
+
+data: 
+
+
+
+data: Join
+
+data:  the
+
+data:  community
+
+data:  discussions
+
+data:  and
+
+data:  get
+
+data:  help
+
+data:  at
+
+data: :
+
+
+
+data: -
+
+data:  [
+
+data: Git
+
+data: Hub
+
+data:  Discussions
+
+data: ](
+
+data: https
+
+data: ://
+
+data: github
+
+data: .com
+
+data: /ver
+
+data: cel
+
+data: /
+
+data: next
+
+data: .js
+
+data: /dis
+
+data: cussions
+
+data: )
+
+
+data: -
+
+data:  [
+
+data: Discord
+
+data: ](
+
+data: https
+
+data: ://
+
+data: discord
+
+data: .gg
+
+data: /
+
+data: next
+
+data: js
+
+data: )
+
+
+
+data: ##
+
+data:  License
+
+data: 
+
+
+
+data: Next
+
+data: .js
+
+data:  is
+
+data:  open
+
+data: -source
+
+data:  software
+
+data: ,
+
+data:  released
+
+data:  under
+
+data:  the
+
+data:  MIT
+
+data:  License
+
+data: .
+
+data: 
