@@ -1,11 +1,13 @@
 // src/components/ChatPanel.tsx
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, User, Bot } from 'lucide-react';
-import { FileNode } from '../services/github';
+import React, { useEffect, useRef, useState } from 'react';
+import ReactMarkdown         from 'react-markdown';
+import remarkGfm             from 'remark-gfm';
+import { Send, User, Bot }   from 'lucide-react';
+import type { FileNode }     from '../services/github';
 
-interface ChatPanelProps {
-  repoUrl: string;
-  fileTree: FileNode[];       // ← new prop
+export interface ChatPanelProps {
+  repoUrl : string;
+  fileTree: FileNode[];
 }
 
 interface Message {
@@ -18,128 +20,187 @@ interface Message {
 const ChatPanel: React.FC<ChatPanelProps> = ({ repoUrl, fileTree }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: '1',
-      text: `I've analyzed the repository structure. What would you like to know about it?`,
+      id: 'init',
+      text: "I've analyzed the repository. What would you like to know?",
       sender: 'bot',
       timestamp: new Date(),
     },
   ]);
-  const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [input, setInput]   = useState('');
+  const [typing, setTyping] = useState(false);
+  const endRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  useEffect(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), [messages]);
+
+  /* —— utility: collapse ** spaced ** ➜ **spaced** & _ spaced _ ➜ _spaced_ —— */
+  const tidyMd = (s: string) =>
+    s
+      // ** bold **
+      .replace(/\*\*\s+([^*]+?)\s+\*\*/g, '**$1**')
+      // _ italic _
+      .replace(/__\s+([^_]+?)\s+__/g, '**$1**')
+      .replace(/_\s+([^_]+?)\s+_/g, '_$1_');
+
+  /* fake-LLM fallback --------------------------------------------------- */
+  const localAnswer = (q: string) => {
+    const repo = repoUrl.split('/').pop() ?? 'repository';
+    if (/structure|file/i.test(q)) {
+      const sample = fileTree.slice(0, 3).map(n => `• ${n.path}`).join('\n');
+      return `**Files in ${repo}**\n\n${sample}`;
+    }
+    return `I'm not sure – could you ask something more specific about **${repo}**?`;
   };
 
-  useEffect(scrollToBottom, [messages]);
-
-  const handleSendMessage = async (e: React.FormEvent) => {
+  async function send(e: React.FormEvent) {
     e.preventDefault();
     if (!input.trim()) return;
 
-    const userMessage: Message = {
+    const userMsg: Message = {
       id: Date.now().toString(),
-      text: input,
+      text: input.trim(),
       sender: 'user',
       timestamp: new Date(),
     };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages(m => [...m, userMsg]);
     setInput('');
-    setIsTyping(true);
+    setTyping(true);
 
-    // Simulate bot response using fileTree if you like:
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: generateBotResponse(input, repoUrl, fileTree),
-        sender: 'bot',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, botMessage]);
-      setIsTyping(false);
-    }, 1500);
-  };
+    /* try the streaming back-end first ---------------------------------- */
+    try {
+      const res = await fetch('http://localhost:4000/api/analyze', {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({
+          repo    : repoUrl,
+          tree    : fileTree,
+          question: userMsg.text,
+        }),
+      });
 
-  // You can now use `fileTree` to give richer answers:
-  const generateBotResponse = (userInput: string, repo: string, tree: FileNode[]): string => {
-    const repoName = repo.split('/').pop() || 'repository';
+      if (!res.ok || !res.body) throw new Error(String(res.status));
 
-    if (/file|structure/i.test(userInput)) {
-      const files = tree.filter(n => n.type === 'blob').slice(0, 3).map(n => n.path);
-      return `I see ${tree.length} items in ${repoName}. A few example files are:\n• ${files.join('\n• ')}`;
+      const reader = res.body
+        .pipeThrough(new TextDecoderStream())
+        .getReader();
+
+      let answer = '';
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        value
+          .split(/\r?\n/)
+          .filter(l => l.startsWith('data:'))
+          .forEach(l => {
+            const chunk = l.replace(/^data:\s*/, '');
+            if (chunk === '[DONE]') return;
+            answer += chunk + ' ';
+
+            setMessages(prev => [
+              ...prev.filter(m => m.id !== 'typing'),
+              {
+                id       : 'typing',
+                text     : tidyMd(answer.trim()),   // ▲ fix markdown
+                sender   : 'bot',
+                timestamp: new Date(),
+              },
+            ]);
+          });
+      }
+
+      setMessages(prev =>
+        prev
+          .filter(m => m.id !== 'typing')
+          .concat({
+            id       : Date.now().toString() + '_bot',
+            text     : tidyMd(answer.trim()),      // ▲ fix markdown
+            sender   : 'bot',
+            timestamp: new Date(),
+          }),
+      );
+    } catch (err) {
+      console.error('SSE failed – using stub:', err);
+      setMessages(m => [
+        ...m,
+        {
+          id       : Date.now().toString() + '_bot',
+          text     : localAnswer(userMsg.text),    // already well-formatted
+          sender   : 'bot',
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
+      setTyping(false);
     }
-    // ...other logic...
+  }
 
-    return `I'm analyzing ${repoName}. Could you be more specific?`;
-  };
-
+  /* —— UI ——————————————————————————————————————————————————————— */
   return (
     <div className="flex flex-col h-full">
-      <h2 className="text-xl font-semibold text-gray-200 mb-4">
-        Repository Chat
-      </h2>
+      <h2 className="text-xl font-semibold text-white mb-4">Repository Chat</h2>
 
-      <div className="flex-1 overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-y-auto mb-4 space-y-4 min-h-[300px]">
-          {messages.map(msg => (
+      <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+        {messages.map(m => (
+          <div key={m.id} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div
-              key={msg.id}
-              className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex max-w-[75%] rounded-lg px-4 py-2 shadow
+                ${m.sender === 'user'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-700 text-gray-100'}`}
             >
-              <div className={`
-                flex max-w-[80%] rounded-lg px-4 py-2 
-                ${msg.sender === 'user'
-                  ? 'bg-red-900 dark:bg-red-800 text-red-100'
-                  : 'bg-gray-800 text-gray-200'}
-              `}>
-                <div className="mr-2 mt-1">
-                  {msg.sender === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-                </div>
-                <div>
-                  <p className="text-sm whitespace-pre-line">{msg.text}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
+              {m.sender === 'user'
+                ? <User className="h-4 w-4 mr-2 mt-[2px] text-white" />
+                : <Bot  className="h-4 w-4 mr-2 mt-[2px] text-indigo-300" />}
+
+              <div className="space-y-1">
+                {m.sender === 'bot'
+                  ? (
+                    <div className="prose prose-sm prose-invert break-words">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {m.text}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="whitespace-pre-wrap break-words text-sm">{m.text}</p>
+                  )}
+
+                <span className="text-[10px] text-gray-400">
+                  {m.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
               </div>
             </div>
-          ))}
-
-          {isTyping && (
-            <div className="flex justify-start">
-              <div className="bg-gray-800 rounded-lg px-4 py-2 text-gray-200">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 rounded-full bg-gray-500 animate-bounce"></div>
-                  <div className="w-2 h-2 rounded-full bg-gray-500 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  <div className="w-2 h-2 rounded-full bg-gray-500 animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div ref={messagesEndRef} />
-        </div>
-
-        <form onSubmit={handleSendMessage} className="mt-auto">
-          <div className="relative">
-            <input
-              type="text"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              placeholder="Ask about the repository..."
-              className="w-full p-3 pr-12 border border-gray-600 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 bg-gray-800 text-gray-200 transition-colors"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim()}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-red-500 p-1 rounded-full hover:bg-red-900 transition-colors"
-            >
-              <Send className="h-5 w-5" />
-            </button>
           </div>
-        </form>
+        ))}
+
+        {typing && (
+          <div className="flex justify-start">
+            <div className="bg-gray-700 text-gray-100 px-3 py-2 rounded-lg animate-pulse">…</div>
+          </div>
+        )}
+
+        <div ref={endRef} />
       </div>
+
+      <form onSubmit={send}>
+        <div className="relative">
+          <input
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            placeholder="Ask about the repository…"
+            className="w-full bg-gray-800 text-gray-100 placeholder-gray-500
+                       border border-gray-700 rounded-md py-3 pr-12
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <button
+            type="submit"
+            disabled={!input.trim()}
+            className="absolute right-2 top-1/2 -translate-y-1/2
+                       text-indigo-400 hover:text-indigo-200 disabled:opacity-40"
+          >
+            <Send className="h-5 w-5" />
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

@@ -82,6 +82,7 @@ const FlowChart: React.FC<FlowChartProps> = ({ nodes, repoUrl }) => {
     /* Mermaid init block + custom CSS for hover ------------- */
     const init = `%%{init:{
       "theme":"dark",
+      "maxTextSize":200000,
       "flowchart":{ "nodeSpacing":28,"rankSpacing":60,"useMaxWidth":false },
       "themeCSS":".node:hover rect{fill:#8b5cf6;stroke-width:2px;}.node:hover{filter:drop-shadow(0 0 4px #8b5cf6)}"
     }}%%`;
@@ -105,7 +106,7 @@ const FlowChart: React.FC<FlowChartProps> = ({ nodes, repoUrl }) => {
 
   /* ── Mermaid render ─────────────────────────────────────── */
   useEffect(() => {
-    mermaid.initialize({ startOnLoad: false, securityLevel: "loose" });
+    mermaid.initialize({ startOnLoad:false, securityLevel:"loose", maxTextSize:200_000 });
   }, []);
 
   useEffect(() => {
