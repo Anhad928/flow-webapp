@@ -14,9 +14,7 @@ const MainContent: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState("");
 
   // Tab state: "flow" or "chat"
-  const [activeTab, setActiveTab] = useState<"flow" | "chat">("flow");
-  // Chat panel only appears after clicking "Open Chat"
-  const [chatOpen, setChatOpen] = useState(false);
+
 
   const handleGenerateFlow = async (url: string) => {
     const startTime = Date.now(); // Track start time
@@ -29,7 +27,7 @@ const MainContent: React.FC = () => {
       const tree = await fetchRepoTree(url);
       setFileTree(tree);
       setGeneratedFlow(true);
-      setActiveTab("flow");   // switch to flow tab automatically
+// =/ switch to flow tab automatically
       ;
     } catch (err: any) {
       console.error("fetchRepoTree error:", err);
@@ -46,7 +44,7 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main className="max-w-7.5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* 1) The generate-flow form */}
       <div className="relative group mb-8">
         <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
@@ -82,56 +80,25 @@ const MainContent: React.FC = () => {
 
       {/* 2) Only show tabs & content once flow is generated */}
       {/* 2) Only show tabs & content once flow is generated AND loading is complete */}
-{generatedFlow && !isGenerating && (  // Changed this line
-  <>
-    {/* Tab buttons */}
-    <div className="flex space-x-4 mb-4">
-      <button
-        onClick={() => setActiveTab("flow")}
-        className={`px-4 py-2 rounded-t-lg ${
-          activeTab === "flow"
-            ? "bg-primary-600 text-white"
-            : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-        }`}
-      >
-        Flowchart
-      </button>
-      <button
-        onClick={() => setActiveTab("chat")}
-        className={`px-4 py-2 rounded-t-lg ${
-          activeTab === "chat"
-            ? "bg-primary-600 text-white"
-            : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-        }`}
-      >
-        Chat
-      </button>
-    </div>
-    
-    <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 transition-all duration-300">
-      {/* Flowchart Tab */}
-      {activeTab === "flow" && (
-        <FlowChart nodes={fileTree} repoUrl={repoUrl} />
-      )}
-
-      {/* Chat Tab */}
-      {activeTab === "chat" && (
-        <div>
-          {!chatOpen ? (
-            <button
-              onClick={() => setChatOpen(true)}
-              className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-            >
-              Open Chat
-            </button>
-          ) : (
-            <ChatPanel repoUrl={repoUrl} fileTree={fileTree} />
-          )}
-        </div>
-      )}
-    </div>
-  </>
-)}
+      {generatedFlow && !isGenerating && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-[fadeIn_0.5s_ease-out]">
+            <div className="lg:col-span-2 relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 transition-all duration-300">
+                <h2 className="text-2xl font-bold gradient-text mb-4">
+                  Repository Flow
+                </h2>
+                <FlowChart nodes = {fileTree} repoUrl={repoUrl} />
+              </div>
+            </div>
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 transition-all duration-300">
+                <ChatPanel repoUrl={repoUrl} fileTree={fileTree} />
+              </div>
+            </div>
+          </div>
+        )}
     </main>
   );
 };
