@@ -19,6 +19,7 @@ const MainContent: React.FC = () => {
   const [chatOpen, setChatOpen] = useState(false);
 
   const handleGenerateFlow = async (url: string) => {
+    const startTime = Date.now(); // Track start time
     setRepoUrl(url);
     setErrorMsg("");
     setIsGenerating(true);
@@ -29,11 +30,18 @@ const MainContent: React.FC = () => {
       setFileTree(tree);
       setGeneratedFlow(true);
       setActiveTab("flow");   // switch to flow tab automatically
+      ;
     } catch (err: any) {
       console.error("fetchRepoTree error:", err);
       setErrorMsg(err.message || "Failed to fetch repository.");
-    } finally {
-      setIsGenerating(false);
+    }  finally {
+      // Calculate remaining time to ensure 5-second minimum
+      const elapsed = Date.now() - startTime;
+      const remainingDelay = Math.max(5000 - elapsed, 0);
+      
+      setTimeout(() => {
+        setIsGenerating(false);
+      }, remainingDelay);
     }
   };
 
@@ -42,7 +50,7 @@ const MainContent: React.FC = () => {
       {/* 1) The generate-flow form */}
       <div className="relative group mb-8">
         <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-        <div className="relative bg-gothicGray dark:bg-gothicDark rounded-lg shadow-xl p-6 transition-all duration-300">
+        <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 transition-all duration-300">
           <h1 className="text-3xl font-bold gradient-text mb-6">
             Generate Repository Flow
           </h1>
@@ -58,57 +66,72 @@ const MainContent: React.FC = () => {
         </div>
       </div>
 
-      {/* 2) Only show tabs & content once flow is generated */}
-      {generatedFlow && (
-        <>
-          {/* Tab buttons */}
-          <div className="flex space-x-4 mb-4">
-            <button
-              onClick={() => setActiveTab("flow")}
-              className={`px-4 py-2 rounded-t-lg ${
-                activeTab === "flow"
-                  ? "bg-primary-600 text-white"
-                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-              }`}
-            >
-              Flowchart
-            </button>
-            <button
-              onClick={() => setActiveTab("chat")}
-              className={`px-4 py-2 rounded-t-lg ${
-                activeTab === "chat"
-                  ? "bg-primary-600 text-white"
-                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-              }`}
-            >
-              Chat
-            </button>
-          </div>
-
-          <div className="bg-gothicGray dark:bg-gothicDark rounded-b-lg shadow-xl p-6 transition-all duration-300">
-            {/* Flowchart Tab */}
-            {activeTab === "flow" && (
-              <FlowChart nodes={fileTree} repoUrl={repoUrl} />
-            )}
-
-            {/* Chat Tab */}
-            {activeTab === "chat" && (
-              <div>
-                {!chatOpen ? (
-                  <button
-                    onClick={() => setChatOpen(true)}
-                    className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-                  >
-                    Open Chat
-                  </button>
-                ) : (
-                  <ChatPanel repoUrl={repoUrl} fileTree={fileTree} />
-                )}
+      {isGenerating && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 transition-all duration-300">
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-500 rounded-full animate-spin"></div>
+                <div className="absolute inset-0 blur-lg bg-indigo-500/30 rounded-full"></div>
               </div>
-            )}
+              <p className="mt-6 text-lg text-gray-700 dark:text-gray-300 animate-pulse">
+                Analyzing repository structure...
+              </p>
+            </div>
           </div>
-        </>
+        )}
+
+      {/* 2) Only show tabs & content once flow is generated */}
+      {/* 2) Only show tabs & content once flow is generated AND loading is complete */}
+{generatedFlow && !isGenerating && (  // Changed this line
+  <>
+    {/* Tab buttons */}
+    <div className="flex space-x-4 mb-4">
+      <button
+        onClick={() => setActiveTab("flow")}
+        className={`px-4 py-2 rounded-t-lg ${
+          activeTab === "flow"
+            ? "bg-primary-600 text-white"
+            : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+        }`}
+      >
+        Flowchart
+      </button>
+      <button
+        onClick={() => setActiveTab("chat")}
+        className={`px-4 py-2 rounded-t-lg ${
+          activeTab === "chat"
+            ? "bg-primary-600 text-white"
+            : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+        }`}
+      >
+        Chat
+      </button>
+    </div>
+    
+    <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 transition-all duration-300">
+      {/* Flowchart Tab */}
+      {activeTab === "flow" && (
+        <FlowChart nodes={fileTree} repoUrl={repoUrl} />
       )}
+
+      {/* Chat Tab */}
+      {activeTab === "chat" && (
+        <div>
+          {!chatOpen ? (
+            <button
+              onClick={() => setChatOpen(true)}
+              className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            >
+              Open Chat
+            </button>
+          ) : (
+            <ChatPanel repoUrl={repoUrl} fileTree={fileTree} />
+          )}
+        </div>
+      )}
+    </div>
+  </>
+)}
     </main>
   );
 };
