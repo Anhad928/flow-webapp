@@ -93,7 +93,7 @@ const MainContent: React.FC = () => {
             </div>
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-              <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 transition-all duration-300">
+              <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 flex flex-col h-[800px] transition-all duration-300">
                 <ChatPanel repoUrl={repoUrl} fileTree={fileTree} />
               </div>
             </div>
