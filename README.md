@@ -73,3 +73,40 @@ npm i && npm run dev            # http://localhost:5173
 | **CI / CD** | **GitHub Actions** | Auto-deploy to Vercel & Fly on push |
 | **Assets / Export** | **file-saver**, **react-flow-to-image** | One-click SVG/PNG export |
 
+---
+
+## Environment Variables
+
+| Variable | Where it lives | Required | Example / Notes |
+|----------|----------------|----------|-----------------|
+| **Frontend (Vite)** |
+| `VITE_API_BASE_URL` | `apps/web/.env` | ✅ | `https://server-frosty-river-911.fly.dev` |
+| `VITE_APP_NAME` | `apps/web/.env` | ❌ | Pretty name for the header (`FlowGen`) |
+| **Back-end (Fly.io)** |
+| `OPENAI_API_KEY` | Fly **secret** `fly secrets set` | ✅ | Your personal GPT-4/4o key |
+| `GITHUB_TOKEN` | Fly **secret** | ⬜ | _(Optional)_ Higher GitHub rate-limit |
+| `PORT` | auto | — | Fly injects `PORT`, default **4000** in dev |
+| **Shared / CI** |
+| `CI` | GitHub Actions | — | Set by Actions—used to skip dev scripts |
+
+### 🔄 Quick Setup
+
+```bash
+# ─ Frontend ───────────────────────────────────────────
+cp apps/web/.env.example apps/web/.env
+# edit VITE_API_BASE_URL if you renamed the Fly app
+pnpm --filter web dev          # or npm run dev
+
+# ─ Back-end (local) ───────────────────────────────────
+cp apps/api/.env.example apps/api/.env
+# add OPENAI_API_KEY & optional GITHUB_TOKEN
+pnpm --filter api dev          # or npm run dev
+
+# ─ Back-end (Fly) ─────────────────────────────────────
+fly secrets set OPENAI_API_KEY=sk-...
+fly secrets set GITHUB_TOKEN=ghp_...   # optional
+fly deploy
+```
+
+
+
