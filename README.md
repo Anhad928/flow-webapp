@@ -51,3 +51,23 @@ npm i && npm run dev            # http://localhost:4000
 cd ../web
 cp .env.example .env            # put VITE_API_URL=http://localhost:4000
 npm i && npm run dev            # http://localhost:5173
+
+```
+## 🛠️ Tech Stack
+
+| Layer | Main Tools & Libraries | Purpose / Notes |
+|-------|-----------------------|-----------------|
+| **Frontend** | **React 18**, **Vite**, **TypeScript**, **Tailwind CSS** | Lightning-fast dev server, strong typing, utility-first styling |
+| **Diagram Engine** | **Mermaid v10** (static SVG) → **React-Flow** (interactive) | Generate repo flow-charts, drag / pan / zoom, live re-routing |
+| **Icons & UI Sugar** | **lucide-react**, **Headless UI** | Accessible icons & components |
+| **State / Data** | React Context + custom hooks | Simple—no external state manager needed |
+| **Chat LLM** | **OpenAI Node SDK (GPT-4o)** | Streaming answers over Server-Sent Events |
+| **Back-end** | **Express 5 (TypeScript)** | Tiny REST/SSE API (`/api/analyze`) |
+| **GitHub API** | **@octokit/rest** | Fetch repo tree & metadata |
+| **Build / Lint** | **ESLint**, **Prettier**, **ts-node / tsc** | Consistent code quality |
+| **Testing** | **Vitest** | Fast TS-friendly unit tests |
+| **Container** | **Node 18-alpine** Docker image | Slim production image (~55 MB) |
+| **Hosting** | **Vercel (frontend)** • **Fly.io (API)** | Zero-config CDN + global edge compute |
+| **CI / CD** | **GitHub Actions** | Auto-deploy to Vercel & Fly on push |
+| **Assets / Export** | **file-saver**, **react-flow-to-image** | One-click SVG/PNG export |
+
