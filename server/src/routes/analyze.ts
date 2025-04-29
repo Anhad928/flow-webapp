@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Router } from "express";
-import { openai } from "../src/openai";
-import type { FileNode } from "../src/types.ts";
+import { openai } from "../openai";
+import type { FileNode } from "../types";
 
 export const analyze = Router();
 

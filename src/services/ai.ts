@@ -4,7 +4,11 @@ export async function* streamAnswer(
     tree: { path: string; type: "blob" | "tree" }[],
     question: string
   ) {
-    const res = await fetch("http://localhost:4000/api/analyze", {
+    if (!process.env.VITE_URL) {
+      throw new Error("Environment variable VITE_URL is not defined");
+    }
+
+    const res = await fetch(process.env.VITE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ repo, tree, question }),
