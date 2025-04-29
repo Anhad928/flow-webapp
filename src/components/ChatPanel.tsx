@@ -67,7 +67,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ repoUrl, fileTree }) => {
 
     /* try the streaming back-end first ---------------------------------- */
     try {
-      const res = await fetch('http://localhost:4000/api/analyze', {
+      const res = await fetch('https://server-frosty-river-911.fly.dev/api/analyze', {
         method : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body   : JSON.stringify({
@@ -150,7 +150,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ repoUrl, fileTree }) => {
             >
               {m.sender === 'user'
                 ? <User className="h-4 w-4 mr-2 mt-[2px] text-white" />
-                : <Bot  className="h-5 w-5 mr-2 mt-[2px] text-indigo-300" />}
+                : <Bot  className="h-6 w-6 mr-2 mt-[2px] text-indigo-300" />}
 
               <div className="space-y-1">
                 {m.sender === 'bot'
