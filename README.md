@@ -53,6 +53,8 @@ cp .env.example .env            # put VITE_API_URL=http://localhost:4000
 npm i && npm run dev            # http://localhost:5173
 
 ```
+---
+
 ## Tech Stack
 
 | Layer | Main Tools & Libraries | Purpose / Notes |
