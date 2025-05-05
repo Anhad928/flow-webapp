@@ -67,7 +67,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ repoUrl, fileTree }) => {
 
     /* try the streaming back-end first ---------------------------------- */
     try {
-      const res = await fetch('https://server-frosty-river-911.fly.dev/api/analyze', {
+      const res = await fetch('http://localhost:4000', {
         method : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body   : JSON.stringify({

@@ -10,5 +10,5 @@ app.use(express.json({ limit: "2mb" }));
 
 app.use("/api/analyze", analyze);
 
-const port = Number(process.env.PORT) || 4000;
+const port = process.env.PORT || 4000;
 app.listen(port, () => console.log(`✨ FlowGen API listening on :${port}`));
