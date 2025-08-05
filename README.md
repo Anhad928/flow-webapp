@@ -1,8 +1,4 @@
 <!-- prettier-ignore-start -->
-<p align="center">
-  <img src="https://raw.githubusercontent.com/YOUR-ORG/YOUR-REPO/main/.github/banner.png" width="720" alt="FlowGen banner">
-</p>
-
 <h1 align="center">FlowGen • Git-repo ↔️ Interactive Flowcharts</h1>
 
 <p align="center">
